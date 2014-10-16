@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 		}
 		unsigned int SetSize = 1 + SlaveSockets.size();
 
-		poll(Set, SetSize, 1000);
+		poll(Set, SetSize, -1);
 		
 		for(unsigned int i = 0; i < SetSize; i++)
 		{
