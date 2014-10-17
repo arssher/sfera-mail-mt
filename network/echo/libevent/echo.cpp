@@ -14,7 +14,18 @@
 #include <errno.h>
 #include <string.h>
 
-#define MAX_EVENTS 32
+int set_nonblock(int fd)
+{
+	int flags;
+#if defined(O_NONBLOCK)
+	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+		flags = 0;
+	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+	flags = 1;
+	return ioctl(fd, FIOBIO, &flags);
+#endif
+} 
 
 struct client
 {
@@ -39,6 +50,7 @@ void on_read(int fd, short ev, void *arg)
 void on_accept(int fd, short ev, void *arg)
 {
 	int SlaveSocket = accept(fd, 0, 0);
+	set_nonblock(SlaveSocket);
 
 	struct client *client;
 	client = (struct client *) calloc(1, sizeof(*client));
@@ -61,7 +73,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in SockAddr;
 	SockAddr.sin_family = AF_INET;
 	SockAddr.sin_port = htons(12345);
-	SockAddr.sin_addr.s_addr = INADDR_ANY;
+	SockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int Result = bind(MasterSocket, (struct sockaddr *)&SockAddr, sizeof(SockAddr));
 
@@ -70,6 +82,8 @@ int main(int argc, char **argv)
 		std::cout << strerror(errno) << std::endl;
 		return 1;
 	}
+
+	set_nonblock(MasterSocket);
 
 	Result = listen(MasterSocket, SOMAXCONN);
 

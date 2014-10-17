@@ -16,6 +16,19 @@
 
 #define MAX_EVENTS 32
 
+int set_nonblock(int fd)
+{
+	int flags;
+#if defined(O_NONBLOCK)
+	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+		flags = 0;
+	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+	flags = 1;
+	return ioctl(fd, FIOBIO, &flags);
+#endif
+} 
+
 int main(int argc, char **argv)
 {
 	int MasterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -29,7 +42,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in SockAddr;
 	SockAddr.sin_family = AF_INET;
 	SockAddr.sin_port = htons(12345);
-	SockAddr.sin_addr.s_addr = INADDR_ANY;
+	SockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int Result = bind(MasterSocket, (struct sockaddr *)&SockAddr, sizeof(SockAddr));
 
@@ -38,6 +51,8 @@ int main(int argc, char **argv)
 		std::cout << strerror(errno) << std::endl;
 		return 1;
 	}
+
+	set_nonblock(MasterSocket);
 
 	Result = listen(MasterSocket, SOMAXCONN);
 
@@ -70,6 +85,7 @@ int main(int argc, char **argv)
 			else if(Events[i].data.fd == MasterSocket)
 			{
 				int SlaveSocket = accept(MasterSocket, 0, 0);
+				set_nonblock(SlaveSocket);
 
 				struct epoll_event Event;
 				Event.data.fd = SlaveSocket;

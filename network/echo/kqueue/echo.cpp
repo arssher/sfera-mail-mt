@@ -14,7 +14,18 @@
 #include <errno.h>
 #include <string.h>
 
-#define N 32
+int set_nonblock(int fd)
+{
+	int flags;
+#if defined(O_NONBLOCK)
+	if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+		flags = 0;
+	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+	flags = 1;
+	return ioctl(fd, FIOBIO, &flags);
+#endif
+} 
 
 int main(int argc, char **argv)
 {
@@ -38,6 +49,8 @@ int main(int argc, char **argv)
 		std::cout << strerror(errno) << std::endl;
 		return 1;
 	}
+
+	set_nonblock(MasterSocket);
 
 	Result = listen(MasterSocket, SOMAXCONN);
 
@@ -66,6 +79,7 @@ int main(int argc, char **argv)
 			if(KEvent.ident == MasterSocket)
 			{
 				int SlaveSocket = accept(MasterSocket, 0, 0);
+				set_nonblock(SlaveSocket);
 				bzero(&KEvent, sizeof(KEvent));
 				EV_SET(&KEvent, SlaveSocket, EVFILT_READ, EV_ADD, 0, 0, 0);
 				kevent(KQueue, &KEvent, 1, NULL, 0, NULL);
