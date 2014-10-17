@@ -87,36 +87,5 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/*
-	   while(true)
-	   {
-	   int N = epoll_wait(EPoll, Events, MAX_EVENTS, -1); 
-	   for(unsigned int i = 0; i < N; i++)
-	   {
-	   if((Events[i].events & EPOLLERR)||(Events[i].events & EPOLLHUP))
-	   {
-	   shutdown(Events[i].data.fd, SHUT_RDWR);
-	   close(Events[i].data.fd);
-	   }
-	   else if(Events[i].data.fd == MasterSocket)
-	   {
-	   int SlaveSocket = accept(MasterSocket, 0, 0);
-
-	   struct epoll_event Event;
-	   Event.data.fd = SlaveSocket;
-	   Event.events = EPOLLIN | EPOLLET;
-
-	   epoll_ctl(EPoll, EPOLL_CTL_ADD, SlaveSocket, &Event);
-	   }
-	   else
-	   {
-	   static char Buffer[1024];
-	   int RecvSize = recv(Events[i].data.fd, Buffer, 1024, MSG_NOSIGNAL);
-	   send(Events[i].data.fd, Buffer, RecvSize, MSG_NOSIGNAL);
-	   }
-	   }
-	   }
-	 */
-
 	return 0;
 }
