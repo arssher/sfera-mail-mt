@@ -43,7 +43,7 @@ static bool isDataOk(Pointer &p, size_t size) {
 
 static bool isValidMemory(Pointer &p, size_t allocatedSize) {
     char *v = reinterpret_cast<char*>(p.get());
-    return (v >= buf && v + allocatedSize < buf + sizeof(buf));
+    return (v >= buf && v + allocatedSize <= buf + sizeof(buf));
 }
 
 static bool fillUp(Allocator &a, size_t allocSize, vector<Pointer> &out) {
