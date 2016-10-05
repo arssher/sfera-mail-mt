@@ -46,6 +46,7 @@ static bool isValidMemory(Pointer &p, size_t allocatedSize) {
     return (v >= buf && v + allocatedSize <= buf + sizeof(buf));
 }
 
+// provoke OutOfMemory error using chunks of @allocSize size, put created pointers to @out.
 static bool fillUp(Allocator &a, size_t allocSize, vector<Pointer> &out) {
     int Max = (2 * sizeof(buf) / allocSize); // To avoid creating an infinite loop.
 

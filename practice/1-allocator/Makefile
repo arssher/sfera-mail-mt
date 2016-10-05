@@ -6,7 +6,7 @@ HDR = allocator.h
 all: tests.done
 
 allocator_test: $(SRC) $(HDR)
-	g++ -O1 -g -std=c++11 -o allocator_test $(SRC) -I../thirdparty $(TEST_FILES) -lpthread
+	g++ -Wall -O1 -g -std=c++11 -o allocator_test $(SRC) -I../thirdparty $(TEST_FILES) -lpthread
 
 tests.done: allocator_test
 	./allocator_test
